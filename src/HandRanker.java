@@ -44,7 +44,68 @@ public class HandRanker {
             suitFreqs[suits.indexOf(c.suit)] += 1;
         }
         rankFreqs[1] = rankFreqs[14]; // aces
-        return 0;
+        if (isFlush(suitFreqs) && isStraight(rankFreqs)) {
+            if (highCard(rankFreqs) == 14) {
+                return ROYAL_FLUSH;
+            }
+            return STRAIGHT_FLUSH;
+        } else if (isFlush(suitFreqs)) {
+            return FLUSH;
+        } else if (isStraight(rankFreqs)) {
+            return STRAIGHT;
+        }
+        int maxFreq = maxFreq(rankFreqs);
+        if (maxFreq == 4) return FOURS;
+        if (maxFreq == 3) return triples(rankFreqs);
+        if (maxFreq == 2) return doubles(rankFreqs);
+        return HIGH_CARD;
+    }
+
+    private static boolean isStraight(int[] rankFreqs) {
+        for (int i = 10; i >= 1; i--) {
+            if (rankFreqs[i] == 1 && rankFreqs[i + 1] == 1 && rankFreqs[i + 2] == 1
+                    && rankFreqs[i + 3] == 1 && rankFreqs[i + 4] == 1) return true;
+        }
+        return false;
+    }
+
+    private static boolean isFlush(int[] suitFreqs) {
+        for (int freq : suitFreqs) {
+            if (freq == 5) return true;
+        }
+        return false;
+    }
+
+    private static int highCard(int[] rankFreqs) {
+        for (int i = 14; i >= 2; i--) {
+            if (rankFreqs[i] > 0) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private static int maxFreq(int[] rankFreqs) {
+        int max = 0;
+        for (int f : rankFreqs) {
+            max = (f > max) ? f : max;
+        }
+        return max;
+    }
+
+    private static int triples(int[] rankFreqs) {
+        for (int f : rankFreqs) {
+            if (f == 2) return FULL_HOUSE;
+        }
+        return THREES;
+    }
+
+    private static int doubles(int[] rankFreqs) {
+        int pairs = 0;
+        for (int f : rankFreqs) {
+            if (f == 2) pairs++;
+        }
+        return (pairs == 2) ? TWO_PAIR : PAIR;
     }
 
     private static Card[] breakTies(List<Card[]> hands, int handType) { // returns null if it's a push
